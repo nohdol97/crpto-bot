@@ -13,7 +13,7 @@ export interface Strategy {
   name: string
   type: string
   status: 'ACTIVE' | 'PAUSED' | 'DISABLED'
-  config: Record<string, any>
+  config: Record<string, unknown>
   allocation_percent: number
   max_positions: number
   created_at: string
@@ -83,7 +83,7 @@ export interface Alert {
   severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL'
   title: string
   message: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   is_read: boolean
   created_at: string
 }
@@ -103,7 +103,7 @@ export interface BacktestResult {
   sharpe_ratio?: number
   sortino_ratio?: number
   max_drawdown?: number
-  config: Record<string, any>
-  trades?: any[]
+  config: Record<string, unknown>
+  trades?: unknown[]
   created_at: string
 }
