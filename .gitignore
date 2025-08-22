@@ -13,3 +13,4 @@ venv/
 # Logs
 logs/
 *.log
+.vercel

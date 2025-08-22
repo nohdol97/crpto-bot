@@ -12,7 +12,11 @@ export default function TradesPage() {
   const [dateRange, setDateRange] = useState<'24h' | '7d' | '30d' | 'all'>('7d');
 
   useEffect(() => {
-    fetchTrades();
+    async function init() {
+      await fetchTrades();
+    }
+    
+    init();
     
     // Set up real-time subscription
     const supabase = createClient();
@@ -49,7 +53,7 @@ export default function TradesPage() {
     // Apply date range filter
     if (dateRange !== 'all') {
       const now = new Date();
-      let startDate = new Date();
+      const startDate = new Date();
       
       switch (dateRange) {
         case '24h':

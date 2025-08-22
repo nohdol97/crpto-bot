@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase';
 import type { Position, Performance, Alert, Strategy } from '@/lib/supabase';
-import { ArrowUp, ArrowDown, TrendingUp, AlertCircle, Activity, DollarSign } from 'lucide-react';
+import { TrendingUp, AlertCircle, Activity, DollarSign } from 'lucide-react';
 
 export default function Dashboard() {
   const [positions, setPositions] = useState<Position[]>([]);
@@ -13,7 +13,17 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDashboardData();
+    async function init() {
+      await Promise.all([
+        fetchPositions(),
+        fetchPerformance(),
+        fetchAlerts(),
+        fetchStrategies()
+      ]);
+      setLoading(false);
+    }
+    
+    init();
     
     // Set up real-time subscriptions
     const supabase = createClient();
@@ -45,16 +55,6 @@ export default function Dashboard() {
       alertsSubscription.unsubscribe();
     };
   }, []);
-
-  async function fetchDashboardData() {
-    await Promise.all([
-      fetchPositions(),
-      fetchPerformance(),
-      fetchAlerts(),
-      fetchStrategies()
-    ]);
-    setLoading(false);
-  }
 
   async function fetchPositions() {
     const supabase = createClient();
