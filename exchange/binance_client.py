@@ -1,9 +1,13 @@
 from binance.spot import Spot
 try:
-    from binance.um_futures import UMFutures
+    from binance_futures import Client as FuturesClient
+    UMFutures = FuturesClient
 except ImportError:
-    # UMFutures not available in binance-connector
-    UMFutures = None
+    try:
+        from binance.um_futures import UMFutures
+    except ImportError:
+        # UMFutures not available in binance-connector
+        UMFutures = None
 from tenacity import retry, stop_after_attempt, wait_exponential_jitter
 import pandas as pd
 

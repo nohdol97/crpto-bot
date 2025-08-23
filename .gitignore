@@ -9,6 +9,7 @@ venv/
 
 # Secrets
 .env
+.pids
 
 # Logs
 logs/
