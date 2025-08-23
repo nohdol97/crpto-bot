@@ -6,21 +6,20 @@ export default function NetworkIndicator() {
   const [isTestnet, setIsTestnet] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check environment variable or fetch from API
-    // For now, we'll check if any recent trades are testnet
+    // Fetch network configuration from Python API server
     async function checkNetwork() {
       try {
-        // In production, you might want to fetch this from an API endpoint
-        // that reads the actual config from the backend
-        const response = await fetch('/api/config');
+        // Fetch from Python API server directly
+        const response = await fetch('http://localhost:5001/api/config');
         if (response.ok) {
           const data = await response.json();
-          setIsTestnet(data.isTestnet);
+          setIsTestnet(data.is_testnet);
         } else {
           // Fallback: assume testnet if no config available
           setIsTestnet(true);
         }
       } catch (error) {
+        console.error('Failed to fetch network config:', error);
         // Default to testnet on error
         setIsTestnet(true);
       }
