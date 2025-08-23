@@ -10,6 +10,7 @@ export default function TradesPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'ALL' | 'FILLED' | 'CANCELED' | 'REJECTED'>('ALL');
   const [dateRange, setDateRange] = useState<'24h' | '7d' | '30d' | 'all'>('7d');
+  const [networkFilter, setNetworkFilter] = useState<'ALL' | 'TESTNET' | 'MAINNET'>('ALL');
 
   useEffect(() => {
     async function init() {
@@ -35,7 +36,7 @@ export default function TradesPage() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [filter, dateRange]);
+  }, [filter, dateRange, networkFilter]);
 
   async function fetchTrades() {
     const supabase = createClient();
@@ -48,6 +49,13 @@ export default function TradesPage() {
     // Apply status filter
     if (filter !== 'ALL') {
       query = query.eq('status', filter);
+    }
+    
+    // Apply network filter
+    if (networkFilter === 'TESTNET') {
+      query = query.eq('is_testnet', true);
+    } else if (networkFilter === 'MAINNET') {
+      query = query.eq('is_testnet', false);
     }
     
     // Apply date range filter
@@ -123,7 +131,30 @@ export default function TradesPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Trade History</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Trade History</h1>
+          
+          {/* Network Filter */}
+          <div className="flex gap-2">
+            {(['ALL', 'TESTNET', 'MAINNET'] as const).map((network) => (
+              <button
+                key={network}
+                onClick={() => setNetworkFilter(network)}
+                className={`px-3 py-1 rounded text-sm transition ${
+                  networkFilter === network 
+                    ? network === 'TESTNET' 
+                      ? 'bg-yellow-600 text-white' 
+                      : network === 'MAINNET'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-blue-600 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                {network === 'ALL' ? 'All Networks' : network}
+              </button>
+            ))}
+          </div>
+        </div>
         
         <div className="flex gap-4">
           {/* Date Range Filter */}
@@ -169,6 +200,7 @@ export default function TradesPage() {
             <thead>
               <tr className="text-left text-gray-400 text-sm border-b border-gray-800">
                 <th className="pb-3">Time</th>
+                <th className="pb-3">Network</th>
                 <th className="pb-3">Symbol</th>
                 <th className="pb-3">Side</th>
                 <th className="pb-3">Status</th>
@@ -182,7 +214,7 @@ export default function TradesPage() {
             <tbody className="text-sm">
               {trades.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="text-center py-8 text-gray-500">
+                  <td colSpan={10} className="text-center py-8 text-gray-500">
                     No trades found
                   </td>
                 </tr>
@@ -193,6 +225,15 @@ export default function TradesPage() {
                     <tr key={trade.id} className="border-t border-gray-800">
                       <td className="py-3 text-gray-400">
                         {formatDate(trade.order_time)}
+                      </td>
+                      <td className="py-3">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          trade.is_testnet === false 
+                            ? 'bg-green-900 text-green-400' 
+                            : 'bg-yellow-900 text-yellow-400'
+                        }`}>
+                          {trade.is_testnet === false ? 'MAINNET' : 'TESTNET'}
+                        </span>
                       </td>
                       <td className="py-3 font-medium">{trade.symbol}</td>
                       <td className="py-3">

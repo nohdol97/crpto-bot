@@ -36,6 +36,7 @@ export interface Position {
   take_profit?: number
   pnl?: number
   pnl_percent?: number
+  is_testnet?: boolean
   strategies?: {
     name: string
     type: string
@@ -57,6 +58,7 @@ export interface Trade {
   commission?: number
   order_time: string
   executed_time?: string
+  is_testnet?: boolean
 }
 
 export interface Performance {
@@ -75,6 +77,7 @@ export interface Performance {
   profit_factor: number
   sharpe_ratio?: number
   max_drawdown?: number
+  is_testnet?: boolean
 }
 
 export interface Alert {
@@ -106,4 +109,5 @@ export interface BacktestResult {
   config: Record<string, unknown>
   trades?: unknown[]
   created_at: string
+  is_testnet?: boolean
 }

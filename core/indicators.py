@@ -41,3 +41,8 @@ def adx(df: pd.DataFrame, period: int = 14):
     minus_di = 100 * (minus_dm.rolling(period).sum() / tr_smooth.replace(0, np.nan))
     dx = ( (plus_di - minus_di).abs() / (plus_di + minus_di).replace(0, np.nan) ) * 100
     return dx.rolling(period).mean()
+
+# Alias for compatibility
+def calculate_atr(df: pd.DataFrame, period: int = 14):
+    """Calculate Average True Range (ATR)"""
+    return atr(df, period)

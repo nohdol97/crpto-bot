@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
+import NetworkIndicator from "@/components/NetworkIndicator";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -33,10 +34,7 @@ export default function RootLayout({
                     <Link href="/settings" className="text-sm hover:text-blue-400 transition">Settings</Link>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="h-2 w-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-gray-400">Connected</span>
-                </div>
+                <NetworkIndicator />
               </div>
             </div>
           </nav>

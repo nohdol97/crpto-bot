@@ -111,7 +111,7 @@ class BacktestEngine:
             
             # Get signal from strategy
             try:
-                signal = strategy_func(historical_data)
+                signal = strategy_func(historical_data, i)
             except Exception as e:
                 logger.error(f"Strategy error: {e}", module="backtest")
                 signal = "HOLD"
@@ -137,11 +137,28 @@ class BacktestEngine:
                    total_trades=len(self.trades),
                    final_capital=self.current_capital)
         
+        # Ensure all values are JSON serializable
+        def make_serializable(obj):
+            if isinstance(obj, (np.integer, np.floating)):
+                return float(obj)
+            elif isinstance(obj, np.ndarray):
+                return obj.tolist()
+            elif isinstance(obj, pd.Series):
+                return obj.tolist()
+            elif isinstance(obj, pd.DataFrame):
+                return obj.to_dict('records')
+            elif isinstance(obj, dict):
+                return {k: make_serializable(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [make_serializable(item) for item in obj]
+            else:
+                return obj
+        
         return {
-            "metrics": self.performance_metrics,
-            "trades": [asdict(t) for t in self.trades],
-            "equity_curve": self.equity_curve,
-            "config": asdict(self.config)
+            "metrics": make_serializable(self.performance_metrics),
+            "trades": [make_serializable(asdict(t)) for t in self.trades],
+            "equity_curve": make_serializable(self.equity_curve),
+            "config": make_serializable(asdict(self.config))
         }
     
     def _prepare_data(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -333,21 +350,30 @@ class BacktestEngine:
         
         avg_duration = np.mean(trade_durations) if trade_durations else 0
         
+        # Ensure all values are native Python types
+        def safe_round(value, decimals=2):
+            if isinstance(value, (np.integer, np.floating)):
+                return round(float(value), decimals)
+            elif isinstance(value, (int, float)):
+                return round(value, decimals)
+            else:
+                return round(float(value or 0), decimals)
+        
         return {
-            "total_return": round(total_return, 2),
-            "total_trades": total_trades,
-            "winning_trades": len(winning_trades),
-            "losing_trades": len(losing_trades),
-            "win_rate": round(win_rate, 2),
-            "profit_factor": round(profit_factor, 2),
-            "sharpe_ratio": round(sharpe_ratio, 4),
-            "max_drawdown": round(max_drawdown, 2),
-            "avg_win": round(avg_win, 2),
-            "avg_loss": round(avg_loss, 2),
-            "avg_trade_duration_hours": round(avg_duration, 2),
-            "best_trade": round(max([t.pnl for t in self.trades if t.pnl], default=0), 2),
-            "worst_trade": round(min([t.pnl for t in self.trades if t.pnl], default=0), 2),
-            "final_capital": round(self.equity_curve[-1] if self.equity_curve else self.config.initial_capital, 2)
+            "total_return": safe_round(total_return, 2),
+            "total_trades": int(total_trades),
+            "winning_trades": int(len(winning_trades)),
+            "losing_trades": int(len(losing_trades)),
+            "win_rate": safe_round(win_rate, 2),
+            "profit_factor": safe_round(profit_factor, 2),
+            "sharpe_ratio": safe_round(sharpe_ratio, 4),
+            "max_drawdown": safe_round(max_drawdown, 2),
+            "avg_win": safe_round(avg_win, 2),
+            "avg_loss": safe_round(avg_loss, 2),
+            "avg_trade_duration_hours": safe_round(avg_duration, 2),
+            "best_trade": safe_round(max([t.pnl for t in self.trades if t.pnl], default=0), 2),
+            "worst_trade": safe_round(min([t.pnl for t in self.trades if t.pnl], default=0), 2),
+            "final_capital": safe_round(self.equity_curve[-1] if self.equity_curve else self.config.initial_capital, 2)
         }
     
     async def save_results(self, strategy_id: str, start_date: str, end_date: str):

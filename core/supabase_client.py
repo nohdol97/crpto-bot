@@ -30,6 +30,10 @@ class SupabaseManager:
         
         # Set logger's Supabase client
         logger.set_supabase_client(self)
+        
+        # Track if we're in testnet mode
+        from config import cfg
+        self.is_testnet = cfg.binance_testnet
     
     # ============== Strategy Management ==============
     
@@ -65,6 +69,9 @@ class SupabaseManager:
         try:
             # Convert Decimal to float for JSON serialization
             position_data = self._convert_decimals(position_data)
+            
+            # Add testnet flag
+            position_data["is_testnet"] = self.is_testnet
             
             response = self.client.table("positions")\
                 .insert(position_data)\
@@ -161,6 +168,9 @@ class SupabaseManager:
         try:
             trade_data = self._convert_decimals(trade_data)
             
+            # Add testnet flag
+            trade_data["is_testnet"] = self.is_testnet
+            
             response = self.client.table("trades")\
                 .insert(trade_data)\
                 .execute()
@@ -207,6 +217,7 @@ class SupabaseManager:
             metrics = self._convert_decimals(metrics)
             metrics["strategy_id"] = strategy_id
             metrics["date"] = today
+            metrics["is_testnet"] = self.is_testnet
             
             # Try to update existing record, or insert new one
             response = self.client.table("performance")\
@@ -306,6 +317,9 @@ class SupabaseManager:
         """Save account balance snapshot"""
         try:
             balance_data = self._convert_decimals(balance_data)
+            
+            # Add testnet flag
+            balance_data["is_testnet"] = self.is_testnet
             
             response = self.client.table("balance_snapshots")\
                 .insert(balance_data)\

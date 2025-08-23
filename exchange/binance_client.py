@@ -1,5 +1,9 @@
 from binance.spot import Spot
-from binance.um_futures import UMFutures
+try:
+    from binance.um_futures import UMFutures
+except ImportError:
+    # UMFutures not available in binance-connector
+    UMFutures = None
 from tenacity import retry, stop_after_attempt, wait_exponential_jitter
 import pandas as pd
 
@@ -47,6 +51,8 @@ class BinanceSpot:
 
 class BinanceFutures:
     def __init__(self, key: str, secret: str, testnet: bool = True):
+        if UMFutures is None:
+            raise ImportError("UMFutures not available. Install binance-futures-connector if needed.")
         base_url = "https://testnet.binancefuture.com" if testnet else None
         self.client = UMFutures(key=key, secret=secret, base_url=base_url)
 

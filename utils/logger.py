@@ -128,29 +128,44 @@ class CryptoLogger:
     def debug(self, message: str, module: str = None, **kwargs):
         """Log debug message"""
         context = self._mask_sensitive_data(kwargs) if kwargs else {}
-        self.system_logger.debug(message, extra={"module": module, "context": context})
+        self.system_logger.debug(message, extra={"bot_module": module, "context": context})
         
         if self.supabase:
-            import asyncio
-            asyncio.create_task(self._log_to_supabase("DEBUG", module, message, context))
+            try:
+                import asyncio
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    asyncio.create_task(self._log_to_supabase("DEBUG", module, message, context))
+            except RuntimeError:
+                pass  # No event loop, skip Supabase logging
     
     def info(self, message: str, module: str = None, **kwargs):
         """Log info message"""
         context = self._mask_sensitive_data(kwargs) if kwargs else {}
-        self.system_logger.info(message, extra={"module": module, "context": context})
+        self.system_logger.info(message, extra={"bot_module": module, "context": context})
         
         if self.supabase:
-            import asyncio
-            asyncio.create_task(self._log_to_supabase("INFO", module, message, context))
+            try:
+                import asyncio
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    asyncio.create_task(self._log_to_supabase("INFO", module, message, context))
+            except RuntimeError:
+                pass  # No event loop, skip Supabase logging
     
     def warning(self, message: str, module: str = None, **kwargs):
         """Log warning message"""
         context = self._mask_sensitive_data(kwargs) if kwargs else {}
-        self.system_logger.warning(message, extra={"module": module, "context": context})
+        self.system_logger.warning(message, extra={"bot_module": module, "context": context})
         
         if self.supabase:
-            import asyncio
-            asyncio.create_task(self._log_to_supabase("WARNING", module, message, context))
+            try:
+                import asyncio
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    asyncio.create_task(self._log_to_supabase("WARNING", module, message, context))
+            except RuntimeError:
+                pass  # No event loop, skip Supabase logging
     
     def error(self, message: str, module: str = None, exc_info: bool = True, **kwargs):
         """Log error message with traceback"""
@@ -163,14 +178,19 @@ class CryptoLogger:
         self.error_logger.error(
             message, 
             exc_info=exc_info,
-            extra={"module": module, "context": context}
+            extra={"bot_module": module, "context": context}
         )
         
         if self.supabase:
-            import asyncio
-            asyncio.create_task(
-                self._log_to_supabase("ERROR", module, message, context, error_trace)
-            )
+            try:
+                import asyncio
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    asyncio.create_task(
+                        self._log_to_supabase("ERROR", module, message, context, error_trace)
+                    )
+            except RuntimeError:
+                pass  # No event loop, skip Supabase logging
     
     def critical(self, message: str, module: str = None, exc_info: bool = True, **kwargs):
         """Log critical message"""
@@ -183,14 +203,19 @@ class CryptoLogger:
         self.error_logger.critical(
             message,
             exc_info=exc_info,
-            extra={"module": module, "context": context}
+            extra={"bot_module": module, "context": context}
         )
         
         if self.supabase:
-            import asyncio
-            asyncio.create_task(
-                self._log_to_supabase("CRITICAL", module, message, context, error_trace)
-            )
+            try:
+                import asyncio
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    asyncio.create_task(
+                        self._log_to_supabase("CRITICAL", module, message, context, error_trace)
+                    )
+            except RuntimeError:
+                pass  # No event loop, skip Supabase logging
     
     def log_trade(self, action: str, symbol: str, side: str, 
                   price: float, quantity: float, **kwargs):

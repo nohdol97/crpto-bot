@@ -164,6 +164,7 @@ export default function Dashboard() {
                 <thead>
                   <tr className="text-left text-gray-400 text-sm">
                     <th className="pb-3">Symbol</th>
+                    <th className="pb-3">Network</th>
                     <th className="pb-3">Side</th>
                     <th className="pb-3">Entry Price</th>
                     <th className="pb-3">Quantity</th>
@@ -174,7 +175,7 @@ export default function Dashboard() {
                 <tbody className="text-sm">
                   {positions.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-8 text-gray-500">
+                      <td colSpan={7} className="text-center py-8 text-gray-500">
                         No open positions
                       </td>
                     </tr>
@@ -182,6 +183,15 @@ export default function Dashboard() {
                     positions.map((position) => (
                       <tr key={position.id} className="border-t border-gray-800">
                         <td className="py-3">{position.symbol}</td>
+                        <td className="py-3">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            position.is_testnet === false 
+                              ? 'bg-green-900 text-green-400' 
+                              : 'bg-yellow-900 text-yellow-400'
+                          }`}>
+                            {position.is_testnet === false ? 'MAIN' : 'TEST'}
+                          </span>
+                        </td>
                         <td className="py-3">
                           <span className={`px-2 py-1 rounded text-xs ${
                             position.side === 'BUY' ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
